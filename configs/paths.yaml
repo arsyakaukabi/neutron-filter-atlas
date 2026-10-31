@@ -1,0 +1,121 @@
+# Every data path used by the code. Resolved by filteratlas.common.paths: D(key) for directories, F(name) for files.
+# The data root is data/ (override with the FA_DATA environment variable). Classes (data/README.md):
+#   upstream/      downloaded from third parties          intermediate/  expensive computed products
+#   derived/       atlas, benchmark and analysis tables    curated/       hand-built tables (tracked in git)
+# File names are bound to the published data files and their checksums and are kept as they are.
+
+data_root: data
+
+dirs:
+  mp: upstream/mp                         # Materials Project: summary table, structures, phonon DOS, force constants
+  exfor: upstream/exfor                   # EXFOR .x4 entries (IAEA exfor_master mirror)
+  endfb80_hdf5: upstream/endfb80_hdf5     # ENDF/B-VIII.0 NNDC HDF5 (openmc_data_downloader), neutron + photon
+  ncrystal_datacmp: upstream/ncrystal_datacmp   # NCrystal published data-comparison plot (qualitative check only)
+  nucdata: intermediate/nucdata           # elemental cross-section tables extracted from ENDF/B-VIII.0
+  mlip: intermediate/mlip                 # MLIP benchmark phonon DOS, per model
+  mlip_sensitivity: intermediate/mlip_sensitivity   # Pb/Bi quasi-harmonic DOS (benchmark diagnostic)
+  mlip_atlas: intermediate/mlip_atlas     # SevenNet phonon DOS for the atlas
+  mlip_relax_sensitivity: intermediate/mlip_relax_sensitivity   # sensitivity rerun of non-converged relaxations with 2,000 steps (never read by the atlas)
+  atlas_eval: intermediate/atlas_eval     # per-compound cache of the SevenNet-DOS evaluation (regenerable)
+  relax_sensitivity_eval: intermediate/relax_sensitivity_eval   # the same cache for the relaxation-sensitivity reruns (step 09)
+  stage4_transport: intermediate/stage4_transport   # OpenMC slab transport of the shortlist: NCMAT files, cases, raw results
+  stage4_dips: intermediate/stage4_dips   # Bragg-dip scans of the shortlist
+  stage4_activation: intermediate/stage4_activation   # depletion chain and activation runs of the shortlist
+  laptop_gpu_check: intermediate/laptop_gpu_check   # GPU-vs-CPU check DOS (inputs kept for a check, not used by the atlas)
+  logs: intermediate/logs                 # run logs read by the code (MLIP status and wall times)
+
+files:
+  # curated (tracked in git)
+  growable_crystals.csv: curated/growable_crystals.csv
+  stage4_dossier.csv: curated/stage4_dossier.csv   # sourced practicality facts of the shortlist
+  hygroscopic_families.csv: curated/hygroscopic_families.csv
+  exfor_candidates_extra.csv: curated/exfor_candidates_extra.csv
+  # intermediate: large per-compound tables read by later steps
+  exfor_benchmark.csv: intermediate/exfor_benchmark.csv
+  stage1_triviality.parquet: intermediate/stage1_triviality.parquet
+  stage1_usable.parquet: intermediate/stage1_usable.parquet
+  stage1_dimensionality.parquet: intermediate/stage1_dimensionality.parquet
+  stage1r_stability_screen.parquet: intermediate/stage1r_stability_screen.parquet
+  stage1r_stability_full.parquet: intermediate/stage1r_stability_full.parquet
+  stage1r_stability_full_mesh60.parquet: intermediate/stage1r_stability_full_mesh60.parquet
+  stage1r_fc_validation.parquet: intermediate/stage1r_fc_validation.parquet
+  stage1r_fc_validation_largecell.parquet: intermediate/stage1r_fc_validation_largecell.parquet
+  stage1r_floor_sensitivity.parquet: intermediate/stage1r_floor_sensitivity.parquet
+  stage1r_pheasy_vs_dfpt.parquet: intermediate/stage1r_pheasy_vs_dfpt.parquet
+  stage3_proxy.parquet: intermediate/stage3_proxy.parquet
+  stage3_stability.parquet: intermediate/stage3_stability.parquet
+  stage3_debye.parquet: intermediate/stage3_debye.parquet
+  stage3_curves.parquet: intermediate/stage3_curves.parquet
+  # derived: candidate set, EXFOR summary, model control
+  stage0_candidates.parquet: derived/stage0_candidates.parquet
+  stage0_mp_meta.json: derived/stage0_mp_meta.json
+  stage0_exfor_summary.json: derived/stage0_exfor_summary.json
+  stage0_model_control.json: derived/stage0_model_control.json
+  cache_manifest.json: derived/cache_manifest.json
+  # derived: triviality test, controls, stability screens and their checks
+  stage1_controls.parquet: derived/stage1_controls.parquet
+  stage1_controls.json: derived/stage1_controls.json
+  stage1_stats.json: derived/stage1_stats.json
+  stage1_enantiomorphs.json: derived/stage1_enantiomorphs.json
+  stage1_anchors.json: derived/stage1_anchors.json
+  stage1r_stability_screen.json: derived/stage1r_stability_screen.json
+  stage1r_stability_full.json: derived/stage1r_stability_full.json
+  stage1r_stability_full_mesh60.json: derived/stage1r_stability_full_mesh60.json
+  stage1r_stability_summary.json: derived/stage1r_stability_summary.json
+  stage1r_fc_validation.json: derived/stage1r_fc_validation.json
+  stage1r_floor_sensitivity.json: derived/stage1r_floor_sensitivity.json
+  stage1r_reproducibility.json: derived/stage1r_reproducibility.json
+  # derived: EXFOR benchmark, MLIP benchmark, uncertainty model
+  stage2_exfor.json: derived/stage2_exfor.json
+  stage2_exfor_benchmark.parquet: derived/stage2_exfor_benchmark.parquet
+  stage2_exfor_binned.parquet: derived/stage2_exfor_binned.parquet
+  stage2_exfor_sc_only.json: derived/stage2_exfor_sc_only.json
+  stage2_kill2_D11.json: derived/stage2_kill2_D11.json
+  stage2_d11_robustness.json: derived/stage2_d11_robustness.json
+  stage2_mgo_audit.json: derived/stage2_mgo_audit.json
+  stage2_pbbi_diag.json: derived/stage2_pbbi_diag.json
+  stage2_pbbi_qha.json: derived/stage2_pbbi_qha.json
+  stage2_lit_compare.json: derived/stage2_lit_compare.json
+  stage2_mlip_set.json: derived/stage2_mlip_set.json
+  stage2_mlip.json: derived/stage2_mlip.json
+  stage2_mlip_benchmark.parquet: derived/stage2_mlip_benchmark.parquet
+  stage2_mlip_sensitivity.json: derived/stage2_mlip_sensitivity.json
+  stage2_orb_diagnostic.json: derived/stage2_orb_diagnostic.json
+  stage2_residuals.json: derived/stage2_residuals.json
+  stage2_uncertainty_model.json: derived/stage2_uncertainty_model.json
+  stage2_text_numbers.json: derived/stage2_text_numbers.json
+  # derived: funnel, tiers, atlas, fronts and atlas checks
+  stage3_proxy.json: derived/stage3_proxy.json
+  stage3_tiers.parquet: derived/stage3_tiers.parquet
+  stage3_tiers.json: derived/stage3_tiers.json
+  stage3_funnel.parquet: derived/stage3_funnel.parquet
+  stage3_mlip_set.json: derived/stage3_mlip_set.json
+  atlas.parquet: derived/atlas.parquet
+  atlas_counts.json: derived/atlas_counts.json
+  stage3_fronts.parquet: derived/stage3_fronts.parquet
+  stage3_fronts.json: derived/stage3_fronts.json
+  stage3_missed.json: derived/stage3_missed.json
+  stage3_not_computed_table.csv: derived/stage3_not_computed_table.csv
+  stage3_controls.json: derived/stage3_controls.json
+  stage3_bragg.json: derived/stage3_bragg.json
+  stage3_anchors.json: derived/stage3_anchors.json
+  stage3_coherent.json: derived/stage3_coherent.json
+  stage3_nucdata_check.json: derived/stage3_nucdata_check.json
+  stage3_openmc_input.json: derived/stage3_openmc_input.json
+  stage3_openmc_check.json: derived/stage3_openmc_check.json
+  stage3_laptop_gpu_check.json: derived/stage3_laptop_gpu_check.json
+  stage3_text_numbers.json: derived/stage3_text_numbers.json
+  stage3_relax_sensitivity.json: derived/stage3_relax_sensitivity.json   # relaxation-sensitivity rerun (step 09)
+  v040_verification.json: derived/v040_verification.json   # consistency check of the SevenNet outputs (not part of the pipeline)
+  stage4_shortlist.parquet: derived/stage4_shortlist.parquet   # the shortlist (step 10)
+  stage4_rank_probabilities.json: derived/stage4_rank_probabilities.json   # Monte Carlo of rank probabilities
+  stage4_transport.json: derived/stage4_transport.json   # OpenMC slab transport
+  stage4_dips.json: derived/stage4_dips.json   # Bragg dips
+  stage4_dossier.json: derived/stage4_dossier.json   # practicality dossier (activation, sourced facts)
+  stage4_temperature.json: derived/stage4_temperature.json   # temperature series
+  stage4_controls.json: derived/stage4_controls.json   # shortlist controls
+  stage4_text_numbers.json: derived/stage4_text_numbers.json   # numbers quoted in the shortlist summary (shortlist.summary4)
+  # archive class (superseded; written only when the pre-audit variant is rerun on purpose)
+  stage2_exfor_preaudit.json: archive/stage2_exfor_preaudit.json
+  stage2_exfor_benchmark_preaudit.parquet: archive/stage2_exfor_benchmark_preaudit.parquet
+  stage2_exfor_binned_preaudit.parquet: archive/stage2_exfor_binned_preaudit.parquet

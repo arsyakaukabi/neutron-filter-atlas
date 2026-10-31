@@ -1,0 +1,26 @@
+# Dynamical-stability screens. Read by filteratlas.xs.ncmat (DOS rule) and filteratlas.dynamics.*.
+# Two rules: the DOS-weight rule and the force-constant screen (the dynamical-stability rule of the atlas).
+
+# DOS rule: a compound is unstable if more than this fraction of the DOS weight lies below the frequency
+unstable_freq_THz: -0.5
+unstable_weight_max: 0.005           # 0.5 % of the total DOS
+
+# Force-constant screen: imaginary frequencies below this value at commensurate q exclude a compound
+fc_unstable_THz: -0.5
+fc_secondary_THz: -0.1             # stricter threshold reported alongside
+fc_mesh_length_A: 40.0               # phonopy q-mesh density (Gamma-centred, length parameter in Angstrom)
+fc_mesh_sensitivity_A: 60.0          # mesh-density sensitivity run
+fc_validation_mesh_length_A: 60.0    # tetrahedron DOS from force constants used to validate the 2 meV floor on the MP DOS
+fc_validation_floors_meV: [0.0, 1.0, 2.0, 3.0]   # floors compared in the validation
+
+# Stratified sample for the force-constant stability screen
+screen_strata_nsites: [[1, 10], [11, 20], [21, 40], [41, 10000]]
+screen_n_per_stratum: 50
+screen_seed: 20261022
+summary_strata_nsites: [[1, 10], [11, 20], [21, 40], [41, 10000]]
+summary_seed: 20261023
+large_cell_check: {n: 20, seed: 20261023}          # stability summary: floor check on 22-42-site cells
+
+# Force-constant screen and Debye scores of the atlas funnel
+supercell_min_length_A: 12.0         # diagonal supercell >= 12 A per axis (as in the MLIP runs)
+fc_near_zero_THz: -0.05              # robustness checks: "clean" force-constant spectra have no mode below this

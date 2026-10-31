@@ -1,0 +1,7 @@
+# Phonon DOS -> per-element VDOS -> NCrystal material. Read by filteratlas.xs.ncmat.
+
+thz_to_eV: 4.135667696e-3            # unit conversion (CODATA 2018 h/e x 1e12)
+vdos_npts: 400                       # points of the resampled per-element VDOS grid
+vdos_floor_meV: 2.0                  # DOS bins below 2 meV dropped; NCrystal extrapolates g ~ E^2 below (validated against force-constant DOS)
+ncrystal_emin_eV: 1.0e-5             # NCrystal's minimum VDOS energy
+floor_sensitivity_meV: [1.0, 3.0]    # triviality test recomputed at these floors

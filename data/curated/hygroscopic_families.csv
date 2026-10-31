@@ -1,0 +1,57 @@
+kind,value,note
+formula,KF,PREREG_STAGE3 §4.4 explicit list
+formula,RbF,PREREG_STAGE3 §4.4 explicit list
+formula,CsF,PREREG_STAGE3 §4.4 explicit list
+formula,BeF2,PREREG_STAGE3 §4.4 explicit list
+formula,Na2O,PREREG_STAGE3 §4.4 explicit list
+formula,K2O,PREREG_STAGE3 §4.4 explicit list
+formula,Rb2O,PREREG_STAGE3 §4.4 explicit list
+formula,Cs2O,PREREG_STAGE3 §4.4 explicit list
+formula,CaO,PREREG_STAGE3 §4.4 explicit list
+formula,SrO,PREREG_STAGE3 §4.4 explicit list
+formula,BaO,PREREG_STAGE3 §4.4 explicit list
+formula,P2O5,PREREG_STAGE3 §4.4 explicit list
+cation,Na,halide rule: alkali
+cation,K,halide rule: alkali
+cation,Rb,halide rule: alkali
+cation,Cs,halide rule: alkali
+cation,Be,halide rule: alkaline earth
+cation,Mg,halide rule: alkaline earth
+cation,Ca,halide rule: alkaline earth
+cation,Sr,halide rule: alkaline earth
+cation,Ba,halide rule: alkaline earth
+cation,Al,halide rule
+cation,Sc,halide rule
+cation,Y,halide rule
+cation,La,halide rule: lanthanide
+cation,Ce,halide rule: lanthanide
+cation,Pr,halide rule: lanthanide
+cation,Nd,halide rule: lanthanide
+cation,Pm,halide rule: lanthanide
+cation,Sm,halide rule: lanthanide
+cation,Eu,halide rule: lanthanide
+cation,Gd,halide rule: lanthanide
+cation,Tb,halide rule: lanthanide
+cation,Dy,halide rule: lanthanide
+cation,Ho,halide rule: lanthanide
+cation,Er,halide rule: lanthanide
+cation,Tm,halide rule: lanthanide
+cation,Yb,halide rule: lanthanide
+cation,Lu,halide rule: lanthanide
+anion,F,elements counted as anions
+anion,Cl,elements counted as anions
+anion,Br,elements counted as anions
+anion,I,elements counted as anions
+anion,O,elements counted as anions
+anion,S,elements counted as anions
+anion,Se,elements counted as anions
+anion,Te,elements counted as anions
+anion,N,elements counted as anions
+anion,P,elements counted as anions
+anion,C,elements counted as anions
+anion,Si,elements counted as anions
+anion,As,elements counted as anions
+anion,Sb,elements counted as anions
+halide,Cl,"flagged if all anions are in this set and a listed cation is present"
+halide,Br,"flagged if all anions are in this set and a listed cation is present"
+halide,I,"flagged if all anions are in this set and a listed cation is present"

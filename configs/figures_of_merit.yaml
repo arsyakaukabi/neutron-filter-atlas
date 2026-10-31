@@ -1,0 +1,48 @@
+# Figures of merit. Read by filteratlas.xs.evaluate and filteratlas.fom.rejection.
+# Bands, target transmission and rejection definitions fixed before the computation.
+
+temperatures_K: [293.15, 77.0]       # room temperature and liquid-nitrogen filter
+
+# Thermal transmission T_th(L, T)
+band_A: [0.5, 3.0]                   # thermal band, Angstrom
+hot_band_A: [0.3, 1.0]               # secondary (hot) band
+moderator_T_K: 300.0                 # Maxwellian moderator temperature
+lambda_T_A: 1.77889                  # h / sqrt(2 m_n k_B 300 K) in Angstrom (= xs.evaluate.lambda_T(300))
+n_lambda: 200                        # grid points in the band (trapezoid)
+T_target: 0.80                       # L08 is the thickness with T_th = 0.80
+probe_wavelengths_A: [1.0, 1.8]      # mu reported at 1.0 and 1.8 A
+wide_curve_A: {min: 0.3, max: 4.5, n: 421}   # stored mu curves for band / moderator sensitivity
+universal_debye_K: [300.0, 600.0]    # universal-theta_D null models
+
+# Fast-neutron rejection A_fast
+watt_a_eV: 0.988e6                   # Watt fission spectrum S ~ exp(-E/a) sinh(sqrt(b E))
+watt_b_per_eV: 2.249e-6
+spectrum_1E_eV: [1.0, 1.0e5]         # 1/E slowing-down spectrum, 1 eV - 100 keV
+spectrum_watt_eV: [1.0e5, 1.0e7]     # Watt spectrum, 100 keV - 10 MeV
+nucdata_grid: {emin_eV: 1.0, emax_eV: 1.0e7, per_decade: 5000}   # log grid, lin-lin interpolation
+nucdata_temperature: 294K            # ENDF/B-VIII.0 free-atom data at 294 K (both atlas temperatures)
+nucdata_check_elements: [Al, O, Bi, Ca, W, Si, C]   # grid-convergence check
+
+# Photon rejection A_gamma
+photon_energies_eV: [1.0e6, 6.0e6]
+photon_mt: [502, 504, 515, 517, 522] # coherent, incoherent, pair (nuclear), pair (electron), photoelectric
+nucdata_check:                       # grid vs exact union grid, pass < 0.1 %
+  cases_atoms_per_A3: {Al2O3: 0.1174, Bi: 0.0282, CaWO4: 0.0723, Si: 0.0498, SiC: 0.0967}   # rough densities, check only
+  L_cm: [5.0, 20.0]
+  tolerance: 1.0e-3
+coherent_check:                      # coherent one-phonon vs incoherent approximation, sapphire and Si only
+  crystals_phonon_id: {Al2O3: aaaegyio, Si: aaaeguxu}   # MP pheasy phonon ids (force constants)
+  mesh: {Al2O3: 10, Si: 16}          # q-mesh per axis
+  lambda_A: {min: 0.5, max: 3.0, n: 26}
+  q_cut_per_A: [8.0, 11.0, 14.0]     # momentum cut-offs; Delta ln L08 is reported at the largest
+bragg_section:                       # polycrystalline cold pass band (Tier A)
+  thickness_cm: 5.0
+  temperature_K: 77.0
+  moderator_T_K: 40.0
+  lambda_max_A: 10.0
+openmc_check:                        # uncollided vs transported A_fast (pass if within sigma_model_dft)
+  compounds: [sapphire, Si, top_tierA]   # sapphire, Si and the top Tier-A compound of the 293 K main front by A_fast,1/E
+  particles_per_batch: 200000
+  batches: 10
+  source_points_1E: 20001            # tabulated 1/E source (OpenMC PowerLaw with exponent -1 mis-samples)
+  source_points_watt: 4001

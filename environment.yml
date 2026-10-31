@@ -1,0 +1,31 @@
+# Main environment of the pipeline (conda / micromamba, conda-forge).
+#   micromamba create -f environment.yml && micromamba activate neutron-filter-atlas
+# OpenMC (steps 07 and 08 extraction and transport check, step 10 transport and activation) is available from
+# conda-forge on Linux and macOS only; on Windows run those steps in a Linux environment. Exact pins of the main
+# environment used for the reported results (Windows): requirements-lock.txt.
+name: neutron-filter-atlas
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  - ncrystal=4.4.6
+  - openmc=0.16.0          # Linux / macOS only
+  - numpy=2.5.4
+  - scipy=1.18.1
+  - pandas=3.0.6
+  - pyarrow=26.0.0
+  - h5py=3.16.0
+  - phonopy=4.8.3
+  - spglib=2.8.0
+  - ase=3.29.0
+  - pyyaml=6.0.3
+  - python-dotenv=1.2.4
+  - psutil=7.2.2
+  - pytest=9.1.1
+  - pip
+  - pip:
+      - pymatgen==2026.9.24
+      - mp-api==0.47.0
+      - emmet-core==0.88.0
+      - deltalake==1.5.1
+      - openmc_data_downloader==0.6.2   # ENDF/B-VIII.0 NNDC HDF5 (step 00)

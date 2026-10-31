@@ -1,0 +1,31 @@
+# Controls. Read by filteratlas.xs.model_control, filteratlas.xs.mp_models
+# (controls of the triviality test), filteratlas.atlas.controls (atlas controls) and by tests/.
+
+model_control:                       # Debye-300 K fallback on sapphire vs EXFOR 31743
+  exfor_entry: 31743                 # Cantargi et al. 2015, 293 K, single crystal
+  energy_window_eV: [1.0e-3, 1.0]
+  phonon_method: pheasy
+  phonon_id: aaaegyio                # mp-aaaaabrz, R-3c sapphire
+  debye_K: 300.0
+  phase0_reference_ratio: 2.85       # smoke-test reference: median model/data of the Debye-300 K fallback
+  tolerance: 0.1                     # control passes within 10 %
+
+stage1:                              # curated and MP-pipeline positive controls, negative controls
+  positive_curated:                  # NCrystal standard-library materials
+    - ["Al2O3 curated", "stdlib::Al2O3_sg167_Corundum.ncmat"]
+    - ["Si curated", "stdlib::Si_sg227.ncmat"]
+    - ["SiO2 alpha curated", "stdlib::SiO2-alpha_sg154_AlphaQuartz.ncmat"]
+    - ["Bi curated", "stdlib::Bi_sg166.ncmat"]
+    - ["MgO curated", "stdlib::MgO_sg225_Periclase.ncmat"]
+  positive_mp:                       # [label, formula, space group] through the MP pipeline under test
+    - ["Al2O3 MP", Al2O3, R-3c]
+    - ["Si MP", Si, Fd-3m]
+    - ["MgO MP", MgO, Fm-3m]
+    - ["SiO2 alpha MP P3_121", SiO2, P3_121]
+    - ["SiO2 alpha MP P3_221", SiO2, P3_221]
+  negative: [CdS, LiF, Gd2O3]        # strong absorbers must rank at the bottom
+  negative_debye_fallback_K: 300.0   # Debye temperature when a negative control has no elastic data
+
+stage3:                              # atlas controls
+  positive: {Al2O3: R-3c, Si: Fd-3m, MgO: Fm-3m, SiO2: P3_221}   # R_c must reproduce the EXFOR benchmark (step 05) to 3 decimals
+  negative_below_percentile: 1       # CdS, LiF, Gd2O3 must lie below this percentile of the atlas L08

@@ -1,0 +1,27 @@
+# Statistical analysis settings: bootstrap sizes, seeds, and the definitions of the triviality test (full model vs proxy).
+# Thresholds fixed before the computation; fixed seeds, deterministic order. Read by filteratlas.atlas.*,
+# filteratlas.dynamics.*, filteratlas.validation.*.
+
+n_boot: 2000                         # bootstrap resamples for every CI
+
+stage1:
+  usable_mu_cut_per_cm: 0.3          # "usable" = mu_th(1.8 A, 293 K) < 0.3 cm^-1
+  usable_mu_cut_sensitivity: [0.1, 0.5]   # cut sensitivity
+  filter_grade_mu_cut_per_cm: 0.1    # "filter-grade" subset (mu_th(1.8 A, 293 K) < 0.1 cm^-1)
+  kill_rho: 0.9                      # triviality test: Spearman rho, full model vs proxy
+  debye_outlier_factor: 1.5          # elastic-Debye pre-screen fails if > 1-3 % fall outside x1.5
+  seed_stats: 20261020               # bootstrap seed of the triviality-test statistics
+  seed_noise_bound: 7                # seed of the noise-bound estimate
+  seed_reproducibility: 31           # seed of the reproducibility check (SIMEX)
+  debye_prescreen: {min_rho: 0.9, max_frac_outside: 0.02}   # elastic Debye usable as an exclusion pre-screen only if both hold
+  band_sensitivity:                  # band / moderator sensitivity: label -> [band low A, band high A, moderator T K]
+    "0.5-3.0_300K": [0.5, 3.0, 300.0]
+    "0.7-3.0_300K": [0.7, 3.0, 300.0]
+    "0.5-2.5_300K": [0.5, 2.5, 300.0]
+    "1.0-3.0_300K": [1.0, 3.0, 300.0]
+    "0.4-3.5_300K": [0.4, 3.5, 300.0]
+    "0.5-4.0_300K": [0.5, 4.0, 300.0]
+    "1.0-4.0_300K": [1.0, 4.0, 300.0]
+    "0.5-3.0_250K": [0.5, 3.0, 250.0]
+    "0.5-3.0_350K": [0.5, 3.0, 350.0]
+    "0.5-4.5_40K_cold": [0.5, 4.5, 40.0]

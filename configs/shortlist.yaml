@@ -1,0 +1,49 @@
+# The shortlist (step 10); settings fixed before the computation
+shortlist:                      # who is shortlisted
+  reference_filters:            # Tier-A references (formula, space group); quartz = the positive-control entry of the atlas
+    - [Al2O3, R-3c]
+    - [Si, Fd-3m]
+    - [SiO2, P3_221]
+    - [MgO, Fm-3m]
+    - [Bi, R-3m]
+  hidden_by_memory_gap:         # Tier-A crystals added explicitly (YAG, BGO)
+    - [Y3Al5O12, Ia-3d]
+    - [Ge3(BiO3)4, I-43d]
+  quartz_material_id: mp-aaaaakgo
+  tierB_exclude_flags: [heavy_soft, molecular, mlip_unstable]
+rank_mc:                        # Monte Carlo of rank probabilities
+  n_draws: 20000
+  seed: 20261025
+  n_grid: 201                   # thickness multipliers spanning exp(+-grid_sigmas * sigma)
+  grid_sigmas: 5.0
+  p_statement: 0.90             # "X beats sapphire" if P > 0.90; "sapphire beats X" if P < 1 - 0.90
+  common_component: 0.5         # sensitivity (ii): z_i = sqrt(c) z_0 + sqrt(1 - c) e_i
+  kill3_p: 0.5                  # K holds if P_K >= 0.5 at both T; R holds if P_R >= 0.5
+transport:                      # OpenMC slab transport
+  min_thickness_cm: 5.0
+  lateral_cm: 1.0e4
+  e_thermal_cut_eV: 0.625
+  e_fast_cut_eV: 1.0e5
+  photon_cut_eV: 1.0e4
+  rel_sd_target: 0.02
+  particles_start: 1000000
+  particles_factor: 4
+  particles_cap: 64000000
+  batches: 20
+  check_tolerance: 0.02
+dips:                           # Bragg dips
+  mosaic_deg: 0.3
+  mosaic_sensitivity_deg: [0.1, 1.0]
+  n_directions: 500
+  n_wavelengths: 6000
+  dip_transmission: 0.9
+  temperature_K: 293.15
+  max_hours_per_compound: 2.0
+  fallback_directions: 300
+dossier:                        # practicality dossier: activation
+  flux_n_cm2_s: 1.0e8
+  irradiation_days: 7
+  cooling_days: [0, 1, 7]
+  volume_cm3: 1.0
+  chain_url: https://anl.box.com/shared/static/nyezmyuofd4eqt6wzd626lqth7wvpprr.xml   # ENDF/B-VIII.0 thermal chain (openmc.org/data)
+temperature_series_K: [293.15, 250.0, 200.0, 150.0, 100.0, 77.0]   # temperature series

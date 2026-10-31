@@ -1,0 +1,52 @@
+# Atlas funnel and tiers: which candidates get which level of physics.
+# Read by filteratlas.xs.proxy_bound, filteratlas.atlas.tiers, filteratlas.atlas.funnel, filteratlas.atlas.assemble.
+
+proxy_bound:                         # exclude if the composition-only upper bound on transmission fails
+  L_cm: 1.0                          #   at L = 1 cm
+  T_th_min: 0.5                      #   T_th,proxy(1 cm) < 0.5 -> excluded_by_proxy_bound
+
+sevennet_budget: 1500                # atlas compounds (priorities a-d)
+drift_set_size: 100                  # compounds with MP DFT phonons run with SevenNet as drift control
+seed: 20261022                       # tie-break and drift-sample seed
+max_supercell_atoms: 480             # larger supercells are skipped (supercell_too_large), no budget used
+debye_priority_percentile: 80        # priority (b): Debye L08 >= P80 of the L08 distribution of DFT compounds passing the dynamical-stability rule
+fc_dir_label: cache/mp/force_constants   # label string stored in the MLIP-set JSON (older directory layout); files are resolved by name
+
+tier_a_matching:                     # mapping of data/curated/growable_crystals.csv onto MP entries (Tier A)
+  crystal_systems: [cubic, tetragonal, orthorhombic, monoclinic, hexagonal, trigonal, rhombohedral, triclinic]
+  solid_solution_regex: ',|\d-|-[A-Z]|x[A-Z]|1-x|/'   # rows with solid-solution / variable formulas -> unmapped
+  structure_types:                   # keyword -> MP space-group symbols; order matters (longer phrases first)
+    - [inverse spinel, [Fd-3m]]
+    - [cubic perovskite, [Pm-3m]]
+    - [alpha-quartz, [P3_121, P3_221]]
+    - [paratellurite, [P4_12_12, P4_32_12]]
+    - [beta-sn, [I4_1/amd]]
+    - [rock salt, [Fm-3m]]
+    - [cscl type, [Pm-3m]]
+    - [zinc blende, [F-43m]]
+    - [wurtzite, [P6_3mc]]
+    - [fluorite, [Fm-3m]]
+    - [rutile, [P4_2/mnm]]
+    - [corundum, [R-3c]]
+    - [spinel, [Fd-3m]]
+    - [garnet, [Ia-3d]]
+    - [scheelite, [I4_1/a]]
+    - [zircon, [I4_1/amd]]
+    - [calcite, [R-3c]]
+    - [sillenite, [I23]]
+    - [eulytite, [I-43d]]
+    - [tetradymite, [R-3m]]
+    - [chalcopyrite, [I-42d]]
+    - [olivine, [Pnma]]
+    - [k2nif4, [I4/mmm]]
+    - [ucl3, [P6_3/m]]
+    - [tysonite, [P-3c1]]
+    - [wolframite, [P2/c]]
+    - [elpasolite, [Fm-3m]]
+    - [langasite, [P321]]
+    - [colquiriite, [P-31c]]
+    - [a7, [R-3m]]
+    - [hcp, [P6_3/mmc]]
+    - [fcc, [Fm-3m]]
+    - [bcc, [Im-3m]]
+    - [diamond, [Fd-3m]]

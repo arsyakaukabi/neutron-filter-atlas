@@ -1,0 +1,17 @@
+# Model uncertainty attached to atlas values, and the domain-of-validity flags.
+# Values from the uncertainty model of step 06 (uncertainty; tests/test_configs.py checks that they agree). Read by
+# filteratlas.atlas.assemble and filteratlas.atlas.fronts.
+
+sigma_model_dft: 0.138               # construction B (per-crystal RMS of band-weighted ln ratios), in ln L08
+sigma_construction_D: 0.196          # sensitivity run: construction D instead of B
+sigma_mlip_add: {293K: 0.046, 77K: 0.040}   # SevenNet vs DFT p68 |Delta ln L08|, added in quadrature
+sigma_soft_floor: 0.144              # soft_lattice / heavy_soft compounds carry sigma >= this (Pb/Bi band residual)
+common_mode_reported_not_subtracted: -0.032   # mean ln ratio at 293 K; reported, never subtracted
+
+# Flags
+soft_lattice_mean_phonon_meV: 10.0   # soft_lattice: VDOS mean phonon energy below this
+heavy_Z: 80                          # heavy_soft = soft_lattice and Z >= 80; untested_heavy = Z >= 80 and not soft
+noble_gases: [He, Ne, Ar, Kr, Xe]    # molecular flag: noble-gas-only formulas
+f_block_4f: [Ce, Pr, Nd, Pm, Sm, Eu, Gd, Tb, Dy, Ho, Er, Tm, Yb]   # partly filled 4f shells
+known_filters: [Al2O3, Si, SiO2, MgO, Bi, Pb, Be, BeO, C]   # known filters: does the growable front contain anything beyond them?
+kill3_tau_threshold: 0.9             # temperature reorders the front if tau < 0.9 or >= 1 Pareto change

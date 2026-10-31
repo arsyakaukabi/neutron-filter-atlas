@@ -1,0 +1,17 @@
+# Candidate set: which Materials Project entries enter the atlas.
+# Selection rules fixed before the computation. Read by filteratlas.ingest.mp.
+
+e_hull_max_eV_per_atom: 0.050        # experimental (theoretical = False) entries within 50 meV/atom of the hull
+
+# Excluded outright
+radioactive:                         # radioactive elements
+  [Tc, Pm, Po, At, Rn, Fr, Ra, Ac, Th, Pa, U, Np, Pu, Am, Cm, Bk, Cf]
+strong_absorbers:                    # thermal absorbers that make a filter useless
+  [B, Cd, Gd, Sm, Eu, Li, Hg, In, Ir, Rh, Au, Hf, Dy, Er, Co, Ag]
+
+# Kept but flagged (element flags)
+flag_elements: [Be, Tl, As, Pb, Bi]  # toxicity / handling flags
+
+# Materials Project summary fields fetched (ingest only)
+mp_summary_fields: [material_id, formula_pretty, elements, nelements, nsites, density, volume, energy_above_hull,
+                    is_stable, theoretical, symmetry, bulk_modulus, shear_modulus, phonon_IDs, database_IDs]

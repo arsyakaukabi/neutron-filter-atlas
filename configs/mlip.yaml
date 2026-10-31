@@ -1,0 +1,20 @@
+# Machine-learned phonons (SevenNet etc.).
+# Read by filteratlas.dynamics.mlip_run, mlip_atlas_run, scheduler and filteratlas.validation.mlip_*.
+
+models: [mace_mp0_medium, orb_v3_cons_inf_omat, sevennet_mf_ompa, dft_fc]   # MLIP benchmark (dft_fc = DOS-method control)
+atlas_model: sevennet_mf_ompa        # chosen by the selection rule fixed before the benchmark
+
+# Protocol (same for the benchmark and the atlas)
+displacement_A: 0.01                 # phonopy finite displacement
+relax_fmax_eV_per_A: 0.005           # FIRE, FixSymmetry + FrechetCellFilter
+relax_max_steps: 500                 # not converged within this -> mlip_failed
+relax_sensitivity_max_steps: 2000    # sensitivity rerun only (mlip_atlas_run --relax-sensitivity), kept separate; the atlas keeps 500
+mesh_length_A: 40.0                  # Gamma-centred q-mesh for DOS and minimum frequency
+
+# GPU allocator cap so that compounds that do not fit fail fast instead of spilling to host RAM
+gpu_memory_fraction: "0.9"           # string: read like the FA_GPU_MEM_FRACTION environment variable
+gpu_check: {n: 20, seed: 20261023}   # GPU-vs-CPU check: random benchmark compounds recomputed on the GPU
+benchmark_set:                       # random benchmark set stratified by nsites
+  seed: 20261024
+  strata_nsites_n: [[1, 10, 60], [11, 20, 60], [21, 40, 30]]
+benchmark_eval_seed: 20261025        # bootstrap seed of the MLIP benchmark evaluation

@@ -1,0 +1,13 @@
+# Compute settings (no physics). Read by filteratlas.common.constants and filteratlas.dynamics.scheduler.
+n_workers: 4                         # process pool size; 8 workers exhausted 15.6 GB RAM (override: FA_WORKERS)
+
+scheduler:                           # dynamics.scheduler: SevenNet atlas run on one machine (values used for the reported run)
+  python_cpu: .venv-mlip-cpu/Scripts/python.exe   # SevenNet CPU environment (requirements-mlip.txt); env FA_PY_CPU overrides
+  python_gpu: .venv-mlip-gpu/Scripts/python.exe   # SevenNet CUDA environment (requirements-mlip-gpu.txt); env FA_PY_GPU overrides
+  cpu_threads: 8
+  ram_reserve_gb: 4.0                # free RAM kept for the OS
+  gpu_host_gb: 3.2                   # host-RAM budget of one GPU job (max measured 3.11 GB over 522 jobs <= 330 atoms)
+  gpu_max_atoms: 330                 # at 336-390 atoms 105 of 113 GPU tries ran out of memory on an 8 GB card
+  cpu_memory_model: {min_gb: 2.0, gb_per_atom: 0.040, intercept_gb: 0.4}   # expected CPU-job peak (fit to measured jobs)
+  adaptive_window: 10                # after adaptive_failures out-of-memory in the last adaptive_window GPU tries,
+  adaptive_failures: 8               #      larger compounds are skipped (FA_NO_ADAPTIVE=1 tries each of them once)

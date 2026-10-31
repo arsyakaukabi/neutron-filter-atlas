@@ -1,0 +1,82 @@
+# EXFOR benchmark against measured total cross-sections (validation).
+# Statistic and acceptance criterion fixed before the computation; the restriction to single-crystal data and the
+# reclassification rule were chosen after the first comparison. Read by filteratlas.ingest.exfor*,
+# filteratlas.validation.*.
+
+exfor_url: "https://raw.githubusercontent.com/IAEA-NDS/exfor_master/main/exforall/{d}/{e}.x4"   # IAEA exfor_master mirror
+
+# --- entries and parsing ----------------------------------------------------------------------------------------------
+# Base entry list; verified extra entries are added from data/curated/exfor_candidates_extra.csv (column verified = yes)
+exfor_entries: [14302, 31743, 13761, 20857, 11595, 30469, 22007, 30528, 30747, 21278, 31503, 11586, 20603,
+                40207, 11204, 11248, 11359, 21149, 14141]
+target_codes:                         # EXFOR target code -> [formula, atoms per formula unit]
+  "13-AL-OXI": [Al2O3, 5]
+  "12-MG-OXI": [MgO, 2]
+  "14-SI-OXI": [SiO2, 3]
+  "40-ZR-OXI": [ZrO2, 3]
+  "4-BE-OXI": [BeO, 2]
+  "14-SI-0": [Si, 1]
+  "32-GE-0": [Ge, 1]
+  "82-PB-0": [Pb, 1]
+  "83-BI-209": [Bi, 1]
+  "6-C-0": [C, 1]
+  "6-C-12": [C, 1]
+  "4-BE-9": [Be, 1]
+  "13-AL-27": [Al, 1]
+  "12-MG-0": [Mg, 1]
+  "29-CU-0": [Cu, 1]
+  "30-ZN-0": [Zn, 1]
+subentry_overrides:                   # where the target code would mislabel the material (checked against SAMPLE text)
+  "14225002": [null, null, "duplicate of 13761008 ('Si2O3' run 12458) coded as Si; excluded"]
+  "14225003": [ZrO2, 3, "ZrO2 single crystal coded as 40-ZR-0"]
+  "23532002": [null, null, "nanodiamond pressed powder (SANS-dominated); excluded"]
+  "21660023": [MgF2, 3, "MgF2 crystalline powder coded as 9-F-CMP"]
+  "21660011": [MgF2, 3, "MgF2 crystal powder coded as 9-F-CMP"]
+sample_form_rules:                    # first matching keyword in SAMPLE + TITLE text wins (order matters; checked by hand)
+  - [vitreous, amorphous]
+  - [monocryst, single_crystal]
+  - [powder, powder]
+  - [microcrystal, polycrystal]
+  - [pyro, pyrolytic_graphite]
+  - [graphite, polycrystal]
+  - [pressing, polycrystal]
+  - [single crystal, single_crystal]
+  - [single-crystal, single_crystal]
+  - [cut from a single, single_crystal]
+  - [sapphire, single_crystal]
+  - [rod, single_crystal_assumed]
+
+# --- benchmark statistic and the acceptance criterion against measured total cross-sections ----------------------------
+energy_window_eV: [1.0e-3, 1.0]      # comparison window (statistic over 1-100 meV, below)
+kill_energy_split_eV: 0.1            # the per-dataset statistic uses 1 meV - 100 meV
+bins_per_decade: 20                  # logarithmic bins
+kill_rms: 0.15                       # a crystal fails if RMS ln(model/data) > 0.15 and > its own dataset spread
+kill_n_failing: 6                    # the acceptance criterion fails if >= 6 of 13 crystals fail
+single_crystal_forms: [single_crystal, single_crystal_assumed, pyrolytic_graphite]   # pyrolytic graphite counts as single crystal
+polycrystal_forms: [polycrystal, powder]
+free_atom_window_eV: [1.0, 20.0]     # normalisation audit against the free-atom limit
+free_atom_tolerance: 0.15            # |median ratio - 1| above this flags a normalisation problem
+crystals:                            # phase fixed a priori; curated NCrystal file; counts for the acceptance criterion
+  Al2O3: [R-3c, Al2O3_sg167_Corundum.ncmat, true]
+  Si: [Fd-3m, Si_sg227.ncmat, true]
+  SiO2: [P3_221, SiO2-alpha_sg154_AlphaQuartz.ncmat, true]
+  MgO: [Fm-3m, MgO_sg225_Periclase.ncmat, true]
+  Ge: [Fd-3m, Ge_sg227.ncmat, true]
+  Cu: [Fm-3m, Cu_sg225.ncmat, true]
+  Zn: [P6_3/mmc, Zn_sg194.ncmat, true]
+  BeO: [P6_3mc, BeO_sg186.ncmat, true]
+  C: [P6_3/mmc, C_sg194_pyrolytic_graphite.ncmat, true]
+  Pb: [Fm-3m, Pb_sg225.ncmat, true]
+  Bi: [R-3m, Bi_sg166.ncmat, true]
+  Al: [Fm-3m, Al_sg225.ncmat, true]
+  Be: [P6_3/mmc, Be_sg194.ncmat, true]
+  ZrO2: [P2_1/c, ZrO2_sg14_Zirconia.ncmat, false]   # sample phase unknown -> not counted
+sensitivity_phases: {SiO2: P3_121}   # enantiomorph sensitivity
+envelope_percentile: 20              # single-crystal data compared at the 20th percentile per bin (under Bragg spikes)
+envelope_percentile_sensitivity: [10, 50]   # envelope sensitivity
+single_crystal_forms_narrow: [single_crystal, single_crystal_assumed]   # variant without pyrolytic graphite
+temperature_shift_K: 20              # dataset temperatures shifted by +-20 K
+d12_reclassification: {factor: 2.0, duplicate_tolerance: 0.01}   # reclassification of polycrystal-behaving single-crystal datasets; duplicate test
+mgo_audit_subentries: [13761004, 13761005]   # MgO audit (reclassification rule)
+heavy_soft_metals: [Pb, Bi]          # uncertainty model: excluded from the in-scope set, reported separately
+residuals_seed: 20261022             # bootstrap seed of the benchmark residuals

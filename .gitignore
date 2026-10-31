@@ -1,0 +1,31 @@
+# --- data: distributed separately (data/README.md); only README, MANIFEST and curated/ are tracked ---
+data/upstream/
+data/intermediate/
+data/derived/
+data/archive/
+*.parquet
+*.h5
+*.hdf5
+*.npz
+*.gz
+!data/curated/**
+# local outputs
+openmc_work/
+*.log
+# secrets
+.env
+# environments and caches
+.venv*/
+venv/
+env/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ipynb_checkpoints/
+*.egg-info/
+# OS / editor junk
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
