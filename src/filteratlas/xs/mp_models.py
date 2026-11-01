@@ -57,6 +57,16 @@ def one(row):
 
 
 def mean_phonon(dos):
+    """Mean phonon energy of a DOS (first moment over positive frequencies).
+
+    Parameters:
+        dos: phonon DOS dict with "frequencies" (THz) and "densities".
+    Returns:
+        mean energy in meV, or nan if the DOS has no positive-frequency weight.
+    Example:
+        >>> from filteratlas.xs.mp_models import mean_phonon
+        >>> mean_phonon(dos)
+    """
     import numpy as np
     f = np.asarray(dos["frequencies"], float)
     d = np.clip(np.asarray(dos["densities"], float), 0, None) * (f > 0)

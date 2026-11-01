@@ -1,0 +1,348 @@
+# Column dictionary of the released tables. tools/docs/gen_columns.py turns this file into wiki/atlas-columns.md and
+# wiki/results-tables.md, and fails if a table has a column that is not described here, or if a described column is
+# missing from the table.
+# Each column is one string with four fields separated by " | ":
+#   meaning | unit | how it is computed (with a pointer to concepts.md where it helps) | what a missing value means
+# Units: "-" for dimensionless numbers, text and flags. Ranges and allowed values are read from the data.
+
+tables:
+  - file: derived/atlas.parquet
+    title: The atlas
+    row: one row per candidate crystal and temperature (two rows per crystal, 293.15 K and 77 K)
+    columns:
+      material_id: "Materials Project identifier of the crystal | - | from the Materials Project | never missing"
+      formula: "reduced chemical formula | - | from the Materials Project | never missing"
+      sg_symbol: "space-group symbol (Hermann-Mauguin, Materials Project notation with `_` for screw axes) | - | from the Materials Project | never missing"
+      crystal_system: "crystal system | - | from the Materials Project | never missing"
+      e_hull: "energy above the convex hull | eV/atom | from the Materials Project; every candidate has e_hull ≤ 0.05 | never missing"
+      tier: "`A` = a commercially grown crystal, `B` = every other candidate | - | matched to the vendor table `data/curated/growable_crystals.csv`; see [Tiers](concepts.md#tiers-commercially-grown-crystals-and-other-candidates) | never missing"
+      tierA_match: "how a commercially grown crystal was matched to its Materials Project entry | - | `sg` = stated space group; `structure_type` = structure-type keyword; `crystal_system_lowest_ehull` = lowest-energy entry of the stated crystal system; `lowest_ehull_phase_mismatch` = lowest-energy entry of the formula, phase not confirmed | empty for tier B"
+      funnel_step: "which level of physics the crystal received | - | see [Coverage](concepts.md#coverage-which-crystals-have-a-full-phonon-model) | never missing"
+      vdos_source: "source of the phonon density of states behind the full-model values | - | `mp_dft` = Materials Project DFT phonons; `sevennet` = phonons from the learned potential SevenNet; `none` = no full model | never missing"
+      proxy_mu_1.8: "composition-only attenuation coefficient at 1.8 Å | 1/cm | absorption plus incoherent scattering of the free elements; see [Levels](concepts.md#three-levels-of-phonon-description) | never missing"
+      proxy_T_1cm: "composition-only thermal transmission of a 1 cm slab | - | Maxwellian-weighted over the thermal band | never missing"
+      proxy_L08: "composition-only L₀.₈ | cm | L₀.₈ from the composition-only attenuation, with the atom density of the Materials Project summary structure | never missing"
+      priority: "queue priority of a crystal without Materials Project phonons for learned-potential phonons | - | `a` = commercially grown; `b` = elastic-Debye L₀.₈ at or above the 80th percentile of the DFT crystals; `c` = no elastic-Debye value; `d` = the rest | empty for crystals with Materials Project phonons, excluded by the proxy bound, or added to the learned-potential runs outside the queue (a few commercially grown crystals)"
+      flag_Be: "contains beryllium (toxic dust when machined) | - | element test | never missing"
+      flag_Tl: "contains thallium (toxic) | - | element test | never missing"
+      flag_As: "contains arsenic (toxic) | - | element test | never missing"
+      flag_Pb: "contains lead (toxic) | - | element test | never missing"
+      flag_Bi: "contains bismuth | - | element test | never missing"
+      hygroscopic: "belongs to a family of water-sensitive compounds | - | rule-based from `data/curated/hygroscopic_families.csv` (explicit formulas, plus alkali and alkaline-earth halides); approximate | never missing"
+      melting_point_unknown: "melting point not held by the atlas | - | true for every row in this release | never missing"
+      interp_only: "dynamical instability only between commensurate q-points | - | the lowest force-constant frequency on the dense mesh is below −0.5 THz, but no commensurate q-point is unstable; see [Flags](concepts.md#domain-and-practicality-flags) | never missing (false when not tested)"
+      unscreenable: "the force-constant stability screen could not be run | - | Materials Project force constants missing or unreadable | never missing (false when not tested)"
+      unstable_dft: "Materials Project DFT phonons are dynamically unstable | - | more than 0.5 % of the DOS weight below −0.5 THz, or an unstable commensurate q-point; such crystals carry no full-model values | never missing"
+      not_computed_budget: "no full model: outside the fixed budget of learned-potential runs | - | `funnel_step == not_computed_budget` | never missing"
+      supercell_too_large: "no full model: the phonon supercell would exceed 480 atoms | - | `funnel_step == supercell_too_large` | never missing"
+      mlip_failed: "no full model: the learned-potential relaxation did not converge within 500 steps, or the phonon calculation failed | - | `funnel_step == mlip_failed` | never missing"
+      not_run_memory: "no full model: the calculation did not fit in memory | - | `funnel_step == not_run_memory` (no crystal in this release) | never missing"
+      tierA_phase_mismatch: "the matched Materials Project entry may not be the grown phase | - | set when `tierA_match` is `lowest_ehull_phase_mismatch` | never missing"
+      not_off_bragg_single_crystal: "the material is not used as an off-Bragg single crystal in practice | - | from the vendor table (for example a material sold only as a polycrystal) | never missing"
+      zmax: "largest atomic number in the formula | - | element test | never missing"
+      nucdata_incomplete: "an element lacks complete ENDF/B-VIII.0 data for the rejection | - | from the nuclear-data extraction (no crystal in this release) | never missing"
+      mean_phonon_meV: "mean phonon energy of the density of states | meV | first moment of the phonon DOS | empty when there is no full model"
+      soft_lattice: "soft lattice | - | mean phonon energy below 10 meV; see [Flags](concepts.md#domain-and-practicality-flags) | never missing (false without a full model)"
+      heavy_soft: "soft lattice with an element of Z ≥ 80 | - | `soft_lattice` and `zmax ≥ 80` | never missing"
+      untested_heavy: "an element with Z ≥ 80 in a lattice that is not soft | - | `zmax ≥ 80` and not `soft_lattice`: heavier than anything the validation tested | never missing"
+      molecular: "molecular crystal or noble-gas solid | - | zero-dimensional bonding network without metal atoms, or only noble gases | never missing"
+      mlip_unstable: "learned-potential phonons are dynamically unstable | - | the SevenNet DOS fails the DOS rule, or a commensurate frequency is below −0.5 THz | never missing"
+      numberdensity_A3: "atom number density of the structure behind the full model | atoms/Å³ | from the Materials Project structure (DFT phonons) or the relaxed structure (SevenNet) | empty when there is no full model"
+      theta_D_elastic: "Debye temperature from the elastic tensor | K | Anderson formula from the Voigt-Reuss-Hill bulk and shear moduli of the Materials Project; a few values are unphysical (above about 2,500 K) because the upstream moduli are; filter with, for example, `theta_D_elastic < 2500` | empty without an elastic tensor or with moduli that are not positive"
+      T: "crystal temperature | K | 293.15 (room temperature) or 77.0 (liquid nitrogen) | never missing"
+      L08: "filter thickness L₀.₈ with the full phonon model | cm | thickness at which the off-Bragg crystal transmits 80 % of a 300 K Maxwellian beam over 0.5–3 Å; see [L₀.₈](concepts.md#filter-thickness-l08) | empty when there is no full model"
+      L08_hot: "L₀.₈ over the hot band 0.3–1.0 Å | cm | same definition and the same 300 K Maxwellian weights, on the hot band | empty when there is no full model"
+      sigma_model: "model uncertainty of `L08` | − (in ln L₀.₈) | 0.138 for DFT phonons; for SevenNet 0.138 and a learned-potential term added in quadrature; at least 0.144 for soft lattices; see [Model uncertainty](concepts.md#model-uncertainty) | empty when there is no full model"
+      mu_1.0: "full-model off-Bragg attenuation coefficient at 1.0 Å | 1/cm | inelastic plus incoherent elastic scattering plus absorption (NCrystal) | empty when there is no full model"
+      mu_1.8: "full-model off-Bragg attenuation coefficient at 1.8 Å | 1/cm | as `mu_1.0` | empty when there is no full model"
+      L08_proxy_vdos_n: "composition-only L₀.₈ at the full-model atom density | cm | as `proxy_L08` but with `numberdensity_A3`, so it compares like for like with `L08` | empty when there is no full model"
+      A_fast_1E: "epithermal rejection at `L08` | − (−ln T) | uncollided, 1/E spectrum over 1 eV–100 keV; see [Rejections](concepts.md#rejections) | empty when there is no full model"
+      A_fast_1E_lo: "epithermal rejection at L08·exp(−sigma_model) | − (−ln T) | lower end of the model-uncertainty band | empty when there is no full model"
+      A_fast_1E_hi: "epithermal rejection at L08·exp(+sigma_model) | − (−ln T) | upper end of the model-uncertainty band | empty when there is no full model"
+      A_fast_watt: "fission-spectrum rejection at `L08` | − (−ln T) | uncollided, Watt spectrum over 100 keV–10 MeV; see [Rejections](concepts.md#rejections) | empty when there is no full model"
+      A_fast_watt_lo: "fission-spectrum rejection at L08·exp(−sigma_model) | − (−ln T) | lower end of the band | empty when there is no full model"
+      A_fast_watt_hi: "fission-spectrum rejection at L08·exp(+sigma_model) | − (−ln T) | upper end of the band | empty when there is no full model"
+      A_gamma_1MeV: "1 MeV photon rejection at `L08` | − (−ln T) | narrow-beam μ(1 MeV)·L08; see [Rejections](concepts.md#rejections) | empty when there is no full model"
+      A_gamma_1MeV_lo: "1 MeV photon rejection at L08·exp(−sigma_model) | − (−ln T) | lower end of the band | empty when there is no full model"
+      A_gamma_1MeV_hi: "1 MeV photon rejection at L08·exp(+sigma_model) | − (−ln T) | upper end of the band | empty when there is no full model"
+      A_gamma_6MeV: "6 MeV photon rejection at `L08` | − (−ln T) | narrow-beam μ(6 MeV)·L08 | empty when there is no full model"
+      A_gamma_6MeV_lo: "6 MeV photon rejection at L08·exp(−sigma_model) | − (−ln T) | lower end of the band | empty when there is no full model"
+      A_gamma_6MeV_hi: "6 MeV photon rejection at L08·exp(+sigma_model) | − (−ln T) | upper end of the band | empty when there is no full model"
+      mu_epi_1eV: "free-atom total attenuation coefficient at 1 eV | 1/cm | n·Σ xᵢ σ_tot,i(1 eV) from ENDF/B-VIII.0 | empty when there is no full model"
+      nieman_ratio: "epithermal over thermal attenuation | - | `mu_epi_1eV / mu_1.8`: a single-energy summary of filter quality (higher is better) | empty when there is no full model"
+      debye_L08: "L₀.₈ with one elastic Debye temperature for the whole crystal | cm | every element gets `theta_D_elastic`; see [Levels](concepts.md#three-levels-of-phonon-description) | empty without an elastic Debye temperature"
+      outside_domain: "outside the domain in which the model was validated | - | `soft_lattice` or `heavy_soft` or `molecular` | never missing"
+      main_front_eligible: "enters the main comparison | - | has a full model and is not `outside_domain`; see [Comparing crystals](comparing-crystals.md) | never missing"
+
+  - file: derived/stage0_candidates.parquet
+    title: Candidate set
+    row: one row per candidate crystal (Materials Project entries that pass the element filters and the hull cut)
+    columns:
+      material_id: "Materials Project identifier | - | from the Materials Project | never missing"
+      formula: "reduced chemical formula | - | from the Materials Project | never missing"
+      elements: "elements, comma-separated | - | from the Materials Project | never missing"
+      nelements: "number of elements | - | from the Materials Project | never missing"
+      nsites: "atoms in the Materials Project cell | - | from the Materials Project | never missing"
+      density: "mass density | g/cm³ | from the Materials Project | never missing"
+      volume: "cell volume | Å³ | from the Materials Project | never missing"
+      e_hull: "energy above the convex hull | eV/atom | from the Materials Project | never missing"
+      is_stable: "on the convex hull | - | from the Materials Project | never missing"
+      theoretical: "the Materials Project marks the entry as theoretical | - | false for every row: only experimentally known entries are candidates | never missing"
+      spacegroup: "space-group number | - | from the Materials Project | never missing"
+      sg_symbol: "space-group symbol | - | from the Materials Project | never missing"
+      crystal_system: "crystal system | - | from the Materials Project | never missing"
+      K_vrh: "Voigt-Reuss-Hill bulk modulus | GPa | from the Materials Project; a few upstream values are unphysical | empty without an elastic tensor"
+      G_vrh: "Voigt-Reuss-Hill shear modulus | GPa | from the Materials Project; a few upstream values are unphysical | empty without an elastic tensor"
+      phonon_pheasy: "Materials Project phonon identifiers from the finite-displacement (pheasy) workflow, comma-separated | - | from the Materials Project | empty string when there are none"
+      phonon_dfpt: "Materials Project phonon identifiers from density-functional perturbation theory, comma-separated | - | from the Materials Project | empty string when there are none"
+      flags: "flagged elements present (Be, Tl, As, Pb, Bi), comma-separated | - | element test | empty string when none"
+      phonon_method: "phonon workflow used | - | `pheasy` preferred, else `dfpt` | empty string without Materials Project phonons"
+      phonon_id: "Materials Project phonon identifier used | - | first identifier of the chosen workflow | empty string without Materials Project phonons"
+
+  - file: derived/stage1_controls.parquet
+    title: Control crystals
+    row: one row per control crystal (known filters as positive controls, strong absorbers as negative controls)
+    columns:
+      control: "name of the control and the source of its model | - | - | never missing"
+      kind: "`positive` (known filter) or `negative` (strong absorber) | - | - | never missing"
+      source: "phonon model used | - | `ncrystal_stdlib` = NCrystal's curated file; `mp_pheasy` = Materials Project phonons; `debye_…` = Debye model at the stated temperature | never missing"
+      mu_1.0_293K: "full-model attenuation at 1.0 Å and 293 K | 1/cm | as atlas `mu_1.0` | never missing"
+      mu_1.8_293K: "full-model attenuation at 1.8 Å and 293 K | 1/cm | as atlas `mu_1.8` | never missing"
+      proxy_1.0_293K: "composition-only attenuation at 1.0 Å | 1/cm | see [Levels](concepts.md#three-levels-of-phonon-description) | never missing"
+      proxy_1.8_293K: "composition-only attenuation at 1.8 Å | 1/cm | as above | never missing"
+      L08_293K: "full-model L₀.₈ at 293 K | cm | as atlas `L08` | never missing"
+      L08_proxy_293K: "composition-only L₀.₈ at 293 K | cm | at the model's atom density | never missing"
+      L08_hot_293K: "full-model L₀.₈ over the hot band at 293 K | cm | as atlas `L08_hot` | never missing"
+      L08_hot_proxy_293K: "composition-only L₀.₈ over the hot band at 293 K | cm | - | never missing"
+      mu_1.0_77K: "as `mu_1.0_293K` at 77 K | 1/cm | - | never missing"
+      mu_1.8_77K: "as `mu_1.8_293K` at 77 K | 1/cm | - | never missing"
+      proxy_1.0_77K: "as `proxy_1.0_293K` at 77 K | 1/cm | - | never missing"
+      proxy_1.8_77K: "as `proxy_1.8_293K` at 77 K | 1/cm | - | never missing"
+      L08_77K: "as `L08_293K` at 77 K | cm | - | never missing"
+      L08_proxy_77K: "as `L08_proxy_293K` at 77 K | cm | - | never missing"
+      L08_hot_77K: "as `L08_hot_293K` at 77 K | cm | - | never missing"
+      L08_hot_proxy_77K: "as `L08_hot_proxy_293K` at 77 K | cm | - | never missing"
+      numberdensity_A3: "atom number density of the model | atoms/Å³ | - | never missing"
+      material_id: "Materials Project identifier | - | - | empty for controls built from NCrystal's curated files"
+
+  - file: derived/stage2_exfor_benchmark.parquet
+    title: Validation against measured cross-sections, per dataset and model
+    row: one row per measured EXFOR dataset (subentry and temperature), model and envelope percentile
+    columns:
+      subentry: "EXFOR subentry number | - | from EXFOR | never missing"
+      entry: "EXFOR entry number | - | from EXFOR | never missing"
+      formula: "crystal | - | from the EXFOR target code, checked against the sample text | never missing"
+      T: "sample temperature of the measurement | K | from EXFOR; see `temp_assumed` | never missing"
+      form: "sample form | - | from keywords in the EXFOR sample text | never missing"
+      temp_assumed: "the temperature was not stated and was assumed | - | - | never missing"
+      author: "authors as given in EXFOR | - | from EXFOR | never missing"
+      n_points: "data points in the dataset | - | - | never missing"
+      n_kill_range: "data points between 1 meV and 100 meV, the range of the acceptance criterion | - | - | never missing"
+      qualifies: "the dataset has enough points in that range to be compared | - | - | never missing"
+      audit: "result of the normalisation audit against the free-atom limit | - | `renormalised_x2` = data multiplied by 2 after the audit; `superseded` = replaced by a later dataset of the same measurement | never missing"
+      renorm: "factor applied to the data after the audit | - | 1 unless the audit found a factor | never missing"
+      free_atom_ratio: "median ratio of the data to the free-atom limit over 1–20 eV | - | - | empty when the dataset does not reach that range"
+      counts_for_kill: "the dataset counts toward the acceptance criterion | - | it qualifies and its crystal is one of the 13 counted crystals | never missing"
+      model: "model compared with the data | - | `curated` = NCrystal file; `mp_dft` = Materials Project DFT phonons (the atlas model); `mp_dft_alt_P3_121` = the same for the other quartz enantiomorph; `debye_elastic` = elastic Debye temperature; `debye300` = Debye temperature of 300 K; `mlip_<model>` = learned-potential phonons | never missing"
+      envelope_q: "percentile of the data per energy bin used for single crystals | - | 20 by default (the lower envelope under Bragg spikes); 10 and 50 as sensitivity | never missing"
+      n_bins_kill: "energy bins between 1 and 100 meV with data | - | 20 bins per decade | never missing"
+      r_d: "root-mean-square ln(model/data) over 1–100 meV | - | see [Validation](concepts.md#validation-against-measured-cross-sections) | empty when no bin has data"
+      bias: "mean ln(model/data) over 1–100 meV | - | - | empty when no bin has data"
+      r_d_1meV_1eV: "root-mean-square ln(model/data) over 1 meV–1 eV | - | - | never missing"
+      fail_E_ranges_meV: "energy range in which ln(model/data) exceeds 0.15 in magnitude | meV | text of a list `[[min, max]]` | `[]` when no bin fails"
+
+  - file: derived/stage2_exfor_binned.parquet
+    title: Validation against measured cross-sections, per energy bin
+    row: one row per dataset, model and energy bin (20 bins per decade, 1 meV–1 eV)
+    columns:
+      bin: "bin index | - | - | never missing"
+      E_c: "bin centre energy | eV | - | never missing"
+      n: "data points in the bin | - | - | never missing"
+      sigma_data: "measured total cross-section per atom in the bin | barn | median (polycrystal, powder) or envelope percentile (single crystal) | never missing"
+      sigma_model: "model total cross-section per atom at the bin centre | barn | off-Bragg baseline for single crystals; full NCrystal model with Bragg scattering for polycrystals and powders | never missing"
+      lr: "ln(sigma_model / sigma_data) | - | - | never missing"
+      subentry: "EXFOR subentry number | - | - | never missing"
+      T: "sample temperature | K | - | never missing"
+      formula: "crystal | - | - | never missing"
+      model: "model | - | as in the per-dataset table | never missing"
+      form: "sample form | - | as in the per-dataset table | never missing"
+
+  - file: derived/stage2_mlip_benchmark.parquet
+    title: Learned-potential benchmark
+    row: one row per benchmark crystal and phonon model (three learned potentials and DFT force constants)
+    columns:
+      model: "phonon model | - | `dft_fc` = Materials Project force constants; the others are learned potentials | never missing"
+      material_id: "Materials Project identifier | - | - | never missing"
+      formula: "reduced formula | - | - | never missing"
+      relax_converged: "the structure relaxation converged | - | - | empty for DFT force constants (no relaxation)"
+      relax_steps: "relaxation steps taken | - | - | empty for DFT force constants"
+      volume_ratio: "relaxed volume over Materials Project volume | - | - | empty for DFT force constants"
+      min_freq_mesh_THz: "lowest phonon frequency on the dense q-mesh | THz | negative = imaginary | never missing"
+      min_freq_comm_THz: "lowest phonon frequency at the supercell-commensurate q-points | THz | negative = imaginary | never missing"
+      n_disp: "displaced supercells computed | - | - | never missing"
+      mlip_mu_1.0_293K: "attenuation at 1.0 Å and 293 K with this model | 1/cm | - | never missing"
+      mlip_mu_1.8_293K: "attenuation at 1.8 Å and 293 K with this model | 1/cm | - | never missing"
+      mlip_L08_293K: "L₀.₈ at 293 K with this model | cm | - | never missing"
+      mlip_mu_1.0_77K: "attenuation at 1.0 Å and 77 K with this model | 1/cm | - | never missing"
+      mlip_mu_1.8_77K: "attenuation at 1.8 Å and 77 K with this model | 1/cm | - | never missing"
+      mlip_L08_77K: "L₀.₈ at 77 K with this model | cm | - | never missing"
+      mlip_mean_phonon_meV: "mean phonon energy with this model | meV | - | never missing"
+      eval_status: "evaluation status | - | - | never missing"
+      arm: "why the crystal is in the benchmark | - | `random_…` = stratified random sample by atoms per cell; `exfor_crystal` = a crystal with measured cross-sections | never missing"
+      wall_s: "wall time of the phonon calculation | s | - | never missing"
+      dft_L08_293K: "L₀.₈ at 293 K with the Materials Project DFT DOS | cm | - | empty when the crystal has no DFT phonons"
+      dft_L08_77K: "L₀.₈ at 77 K with the DFT DOS | cm | - | empty when the crystal has no DFT phonons"
+      dft_mu_1.0_293K: "attenuation at 1.0 Å and 293 K with the DFT DOS | 1/cm | - | empty when the crystal has no DFT phonons"
+      dft_mu_1.8_293K: "attenuation at 1.8 Å and 293 K with the DFT DOS | 1/cm | - | empty when the crystal has no DFT phonons"
+      nsites: "atoms in the Materials Project cell | - | - | empty when the crystal has no DFT phonons"
+      phonon_method: "Materials Project phonon workflow | - | - | empty when the crystal has no DFT phonons"
+      phonon_id: "Materials Project phonon identifier | - | - | empty when the crystal has no DFT phonons"
+      dft_mean_phonon_meV: "mean phonon energy with the DFT DOS | meV | - | empty when the crystal has no DFT phonons"
+      failed: "the model failed for this crystal | - | evaluation error or relaxation not converged | never missing"
+      dlog_L08_293K: "ln(model L₀.₈ / DFT L₀.₈) at 293 K | - | - | empty when the crystal has no DFT phonons"
+      dlog_L08_77K: "ln(model L₀.₈ / DFT L₀.₈) at 77 K | - | - | empty when the crystal has no DFT phonons"
+      softening: "model mean phonon energy over DFT mean phonon energy | - | below 1 means the model is softer | empty when the crystal has no DFT phonons"
+
+  - file: derived/stage3_fronts.parquet
+    title: Front membership
+    row: one row per crystal, temperature and front definition
+    columns:
+      material_id: "Materials Project identifier | - | - | never missing"
+      T: "temperature | K | - | never missing"
+      key: "front definition `<temperature>|<tier>|<panel>|<axes>` | - | panel `main` (main-front eligible), `outside_domain`, or `no_heavy_no_4f` (eligible, no Z ≥ 80, no partly filled 4f shell); axes `main` (`A_fast_1E` against `A_gamma_1MeV`) or `secondary` (`A_fast_watt` against `A_gamma_6MeV`); see [Comparing crystals](comparing-crystals.md) | never missing"
+      front: "the crystal is on this Pareto front | - | not dominated on both axes (higher is better) | never missing"
+      within_1sigma: "the crystal is within one model uncertainty of this front | - | its point at L08·exp(+sigma_model) is not dominated by any front member's central point | never missing"
+
+  - file: derived/stage3_funnel.parquet
+    title: Funnel
+    row: one row per candidate crystal
+    columns:
+      material_id: "Materials Project identifier | - | - | never missing"
+      formula: "reduced formula | - | - | never missing"
+      sg_symbol: "space-group symbol | - | - | never missing"
+      excluded_by_proxy_bound: "the composition-only bound already rules the crystal out | - | composition-only transmission of a 1 cm slab below 0.5 | never missing"
+      proxy_L08: "composition-only L₀.₈ | cm | as in the atlas | never missing"
+      proxy_T_1cm: "composition-only transmission of a 1 cm slab | - | as in the atlas | never missing"
+      dos_convert_ok: "the Materials Project phonon DOS could be converted to a per-element DOS | - | - | empty without Materials Project phonons"
+      d7a_pass: "the Materials Project phonons pass the dynamical-stability rules | - | DOS rule and no unstable commensurate q-point | empty without Materials Project phonons"
+      unstable_dft: "the Materials Project phonons are dynamically unstable | - | as in the atlas | empty without Materials Project phonons"
+      interp_only: "instability only between commensurate q-points | - | as in the atlas | empty without Materials Project phonons"
+      unscreenable: "force constants missing or unreadable | - | as in the atlas | empty without Materials Project phonons"
+      priority: "queue priority for learned-potential phonons | - | as in the atlas | empty for crystals with Materials Project phonons or excluded by the proxy bound"
+      debye_score: "elastic-Debye L₀.₈ over the 80th percentile of the DFT crystals (larger of the two temperatures) | - | - | empty without an elastic Debye temperature"
+      debye_L08_293K: "elastic-Debye L₀.₈ at 293 K | cm | see [Levels](concepts.md#three-levels-of-phonon-description) | empty without an elastic Debye temperature"
+      debye_L08_77K: "elastic-Debye L₀.₈ at 77 K | cm | - | empty without an elastic Debye temperature"
+      supercell_atoms: "atoms in the phonon supercell (at least 12 Å per axis) | - | - | empty for crystals with Materials Project phonons or excluded by the proxy bound"
+      funnel_label: "outcome of the budget selection | - | - | empty for crystals with Materials Project phonons or excluded by the proxy bound"
+      funnel_step: "outcome before the learned-potential runs | - | as in the atlas, with `sevennet_selected` in place of the run outcome | never missing"
+      tierA: "commercially grown crystal | - | - | never missing"
+
+  - file: derived/stage3_not_computed_table.csv
+    title: Crystals without a full model
+    row: one row per crystal that passed the proxy bound but has no full model
+    columns:
+      material_id: "Materials Project identifier | - | - | never missing"
+      formula: "reduced formula | - | - | never missing"
+      sg_symbol: "space-group symbol | - | - | never missing"
+      tier: "tier | - | - | never missing"
+      funnel_step: "why there is no full model | - | as in the atlas | never missing"
+      n_summary_A3: "atom number density of the Materials Project summary structure | atoms/Å³ | - | never missing"
+      proxy_L08: "composition-only L₀.₈ | cm | - | never missing"
+      debye_L08_293K: "elastic-Debye L₀.₈ at 293 K | cm | - | empty without an elastic Debye temperature"
+      debye_L08_77K: "elastic-Debye L₀.₈ at 77 K | cm | - | empty without an elastic Debye temperature"
+      A_fast_1E_debye_293K: "epithermal rejection at the elastic-Debye L₀.₈, 293 K | − (−ln T) | - | empty without an elastic Debye temperature"
+      A_gamma_1MeV_debye_293K: "1 MeV photon rejection at the elastic-Debye L₀.₈, 293 K | − (−ln T) | - | empty without an elastic Debye temperature"
+      A_fast_1E_proxybound_293K: "epithermal rejection at the upper bound on L₀.₈, 293 K | − (−ln T) | proxy L₀.₈ times the bound factor measured on the crystals with a full model | never missing (`inf` when the bound thickness is unbounded)"
+      A_gamma_1MeV_proxybound_293K: "1 MeV photon rejection at that bound, 293 K | − (−ln T) | - | never missing"
+      debye_front_contender_293K: "the elastic-Debye point is not dominated by the main front of its tier at 293 K | - | - | never missing"
+      not_excluded_by_proxy_bound_293K: "the bound point is not dominated by the main front of its tier at 293 K | - | the crystal cannot be ruled out | never missing"
+      A_fast_1E_debye_77K: "as above at 77 K | − (−ln T) | - | empty without an elastic Debye temperature"
+      A_gamma_1MeV_debye_77K: "as above at 77 K | − (−ln T) | - | empty without an elastic Debye temperature"
+      A_fast_1E_proxybound_77K: "as above at 77 K | − (−ln T) | - | never missing (`inf` when unbounded)"
+      A_gamma_1MeV_proxybound_77K: "as above at 77 K | − (−ln T) | - | never missing"
+      debye_front_contender_77K: "as above at 77 K | - | - | never missing"
+      not_excluded_by_proxy_bound_77K: "as above at 77 K | - | - | never missing"
+
+  - file: derived/stage3_tiers.parquet
+    title: Commercially grown crystals
+    row: one row per commercially grown crystal matched to a Materials Project entry
+    columns:
+      material_id: "Materials Project identifier of the matched entry | - | - | never missing"
+      growable_formula: "formula as written in the vendor table | - | - | never missing"
+      formula: "Materials Project reduced formula | - | - | never missing"
+      sg_symbol: "space-group symbol of the matched entry | - | - | never missing"
+      crystal_system: "crystal system of the matched entry | - | - | never missing"
+      e_hull: "energy above the hull of the matched entry | eV/atom | - | never missing"
+      phase_text: "phase as the vendor states it | - | - | never missing"
+      tierA_match: "how the match was made | - | as in the atlas | never missing"
+      n_vendor_rows: "vendor-table rows for this crystal | - | - | never missing"
+      n_polymorph_candidates: "candidate entries with the same formula | - | - | never missing"
+      tierA_phase_mismatch: "the phase is not confirmed | - | as in the atlas | never missing"
+      not_off_bragg_single_crystal: "not used as an off-Bragg single crystal | - | as in the atlas | never missing"
+      notes: "notes from the vendor table | - | - | never missing"
+
+  - file: derived/stage4_shortlist.parquet
+    title: Shortlist
+    row: one row per shortlisted crystal
+    columns:
+      material_id: "Materials Project identifier | - | - | never missing"
+      formula: "reduced formula | - | - | never missing"
+      sg_symbol: "space-group symbol | - | - | never missing"
+      tier: "tier | - | - | never missing"
+      vdos_source: "phonon source | - | as in the atlas | never missing"
+      reasons: "why the crystal is on the shortlist, semicolon-separated | - | for example a front member, within one model uncertainty of the front, or a reference filter | never missing"
+      polytype: "SiC polytype label | - | from the space group and the atoms per cell | empty string for other crystals"
+      flags: "flags set for the crystal, comma-separated | - | names of atlas flag columns | empty string when none"
+      outside_domain: "as in the atlas | - | - | never missing"
+      main_front_eligible: "as in the atlas | - | - | never missing"
+      known_filter: "the formula is a known filter material (Al₂O₃, Si, SiO₂, MgO, Bi, Pb, Be, BeO, C) | - | - | never missing"
+
+  - file: curated/growable_crystals.csv
+    title: Vendor table of commercially grown crystals
+    row: one row per vendor offer (a crystal can have several rows); tracked in git
+    columns:
+      formula: "formula as the vendor writes it | - | - | never missing"
+      common_name: "common name | - | - | never missing"
+      crystal_system_or_phase: "crystal system or phase as stated | - | - | never missing"
+      vendor: "vendor | - | - | never missing"
+      catalogue_url: "catalogue page | - | - | never missing"
+      date_accessed: "date the page was read | - | - | never missing"
+      max_size_stated: "largest size the vendor states | - | - | empty when not stated"
+      growth_method_stated: "growth method the vendor states | - | - | empty when not stated"
+      price_stated: "price the vendor states, with the item | - | - | empty when not stated"
+      notes: "notes | - | - | empty when none"
+
+  - file: curated/hygroscopic_families.csv
+    title: Water-sensitive families
+    row: one row per rule entry; tracked in git
+    columns:
+      kind: "`formula` (explicit compound), `cation`, `anion` or `halide` (halide rule) | - | - | never missing"
+      value: "formula or element symbol | - | - | never missing"
+      note: "where the entry comes from | - | - | never missing"
+
+  - file: curated/exfor_candidates_extra.csv
+    title: Additional EXFOR entries
+    row: one row per EXFOR subentry checked by hand; tracked in git
+    columns:
+      entry: "EXFOR entry number | - | - | never missing"
+      subentry: "EXFOR subentry number | - | - | never missing"
+      target_code: "EXFOR target code | - | - | never missing"
+      material: "material, with remarks on the sample text | - | - | never missing"
+      sample_form: "sample form as described | - | - | never missing"
+      temperature_K: "sample temperature as stated | - | - | never missing"
+      energy_min_eV: "lowest energy in the dataset | eV | - | never missing"
+      energy_max_eV: "highest energy in the dataset | eV | - | never missing"
+      reference: "bibliographic reference | - | - | never missing"
+      verified: "whether the raw entry was fetched and checked | - | only rows whose value starts with `yes` are used | never missing"
+
+  - file: curated/stage4_dossier.csv
+    title: Practicality data of the shortlist
+    row: one row per crystal and quantity; tracked in git
+    columns:
+      compound: "formula and space group | - | - | never missing"
+      quantity: "practical quantity | - | - | never missing"
+      value: "value as stated by the source | - | - | never missing"
+      size_or_unit: "unit, or the size in mm that a price refers to | - | - | empty when not applicable"
+      source_url: "source page | - | - | empty when the value has no single source"
+      access_date: "date the source was read | - | - | empty when there is no source"
+      note: "remark | - | - | empty when none"

@@ -1,7 +1,11 @@
-"""Analysis of the atlas table (data/derived/atlas.parquet):
-Pareto fronts (main and secondary, per temperature and tier, plus the outside-domain panel), the "within 1 sigma"
-sets, the Tier-A fidelity ladder, who moves, the sensitivity runs, and a preview of the test of whether the growable
-front contains anything beyond the known filters and whether temperature reorders it (decided in step 10).
+"""Pareto fronts of the atlas and the analyses built on them.
+
+pareto() and within() are public (wiki/api.md). main() (step 08, sub-step "fronts") reads the atlas table and writes
+the fronts per temperature, tier and panel (main, outside the validated domain, without heavy elements or partly
+filled 4f shells), the sets within one model uncertainty of each front, the comparison of the levels of phonon
+description (proxy, elastic Debye, full model), the crystals whose rank changes most between levels and between
+temperatures, the band, moderator and flag sensitivity runs, and a first look at whether the front of commercially
+grown crystals holds only known filters and whether cooling reorders it (the probabilities come from step 10).
 -> the fronts JSON and the front-membership table (per compound x T) in data/derived
 """
 import json
@@ -33,7 +37,16 @@ TAU_REORDER = _U["kill3_tau_threshold"]
 
 
 def pareto(x, y):
-    """Boolean mask of non-dominated points (maximise both)."""
+    """Pareto front of a set of points: the points not dominated on both axes (higher is better on both).
+
+    Parameters:
+        x, y: values of the two figures of merit (array-like, same length).
+    Returns:
+        boolean array, True for front members; of two identical points only the first is kept.
+    Example:
+        >>> from filteratlas.atlas.fronts import pareto
+        >>> pareto([1, 2, 3], [3, 2, 1]), pareto([1, 2], [1, 2])
+    """
     x, y = np.asarray(x, float), np.asarray(y, float)
     order = np.lexsort((-y, -x))
     keep = np.zeros(len(x), bool)
@@ -47,7 +60,17 @@ def pareto(x, y):
 
 
 def within(xhi, yhi, fx, fy):
-    """+1 sigma point not dominated by any front member's central point."""
+    """Points within one model uncertainty of a front: the +1 sigma point is not dominated by any front member.
+
+    Parameters:
+        xhi, yhi: the two figures of merit evaluated at L0.8 * exp(+sigma) (numpy arrays or pandas Series).
+        fx, fy: central values of the front members (iterables).
+    Returns:
+        boolean array, one entry per point.
+    Example:
+        >>> import numpy as np; from filteratlas.atlas.fronts import within
+        >>> within(np.array([1.5, 0.5]), np.array([1.5, 0.5]), [1.0], [1.0])
+    """
     out = np.ones(len(xhi), bool)
     for a, b in zip(fx, fy):
         out &= ~((a >= xhi) & (b >= yhi) & ((a > xhi) | (b > yhi)))

@@ -1,0 +1,103 @@
+# Meanings used in wiki/configuration.md where the YAML comment is missing, continues on the next line, or does not
+# read well on its own. Keys are "<file>.<key>" or "<file>.<parent>.<child>". Read by tools/docs/gen_config.py.
+
+files:
+  compute: Compute settings (no physics). They change run time and memory use, never a result.
+  paths: Every data path used by the code.
+
+keys:
+  analysis.stage1: settings of the triviality test (composition-only proxy against the full model) and of the fidelity statistics
+  benchmark.exfor_entries: EXFOR entries read for the validation (extra entries come from `data/curated/exfor_candidates_extra.csv`)
+  benchmark.target_codes: "EXFOR target code -> [formula, atoms per formula unit]"
+  benchmark.polycrystal_forms: sample forms compared with the full model including Bragg scattering
+  benchmark.crystals: "per crystal: phase fixed before the comparison, the NCrystal file of the curated model, and whether the crystal counts for the acceptance criterion"
+  candidates.mp_summary_fields: Materials Project summary fields downloaded by step 00
+  compute.n_workers: "size of the process pool of the parallel steps; more workers need more memory (environment variable FA_WORKERS overrides)"
+  compute.scheduler: settings of the scheduler that runs the learned-potential phonon calculations, one process per crystal, on one workstation
+  compute.scheduler.python_cpu: "Python of the CPU learned-potential environment (requirements-mlip.txt); environment variable FA_PY_CPU overrides"
+  compute.scheduler.python_gpu: "Python of the CUDA learned-potential environment (requirements-mlip-gpu.txt); environment variable FA_PY_GPU overrides"
+  compute.scheduler.cpu_threads: threads available to CPU jobs
+  compute.scheduler.ram_reserve_gb: free memory kept for the operating system
+  compute.scheduler.gpu_host_gb: host memory reserved for one GPU job
+  compute.scheduler.gpu_max_atoms: largest supercell sent to the GPU; larger ones run on the CPU (set for a GPU with 8 GB)
+  compute.scheduler.cpu_memory_model: expected peak memory of a CPU job, min_gb + gb_per_atom × atoms + intercept_gb
+  compute.scheduler.adaptive_window: "with adaptive_failures, a guard: after that many out-of-memory failures in the last adaptive_window GPU tries, larger crystals go to the CPU (environment variable FA_NO_ADAPTIVE=1 switches it off)"
+  compute.scheduler.adaptive_failures: see adaptive_window
+  controls.model_control: model control, the Debye 300 K fallback on sapphire compared with EXFOR entry 31743
+  controls.model_control.energy_window_eV: energy window of the comparison
+  controls.model_control.phonon_method: Materials Project phonon workflow of the sapphire entry
+  controls.model_control.phonon_id: Materials Project phonon identifier of sapphire (mp-aaaaabrz, R-3c)
+  controls.model_control.debye_K: Debye temperature of the fallback model
+  controls.model_control.phase0_reference_ratio: reference value of the median model/data ratio of the fallback; the control passes within the tolerance
+  controls.stage1: controls of the triviality test (positive = known filters, negative = strong absorbers)
+  controls.stage3: controls of the atlas
+  controls.stage3.positive: "known filters [formula: space group] whose per-crystal validation value must be reproduced by the atlas code to 3 decimals"
+  figures_of_merit.watt_b_per_eV: second parameter of the Watt spectrum (see watt_a_eV)
+  figures_of_merit.photon_energies_eV: photon energies of the photon rejections
+  figures_of_merit.nucdata_check.L_cm: thicknesses at which the grid check compares rejections
+  figures_of_merit.nucdata_check.tolerance: largest relative difference allowed in the grid check
+  figures_of_merit.coherent_check.lambda_A: wavelength grid of the check
+  figures_of_merit.bragg_section: polycrystalline cold pass band of the commercially grown crystals
+  figures_of_merit.bragg_section.thickness_cm: slab thickness
+  figures_of_merit.bragg_section.temperature_K: crystal temperature
+  figures_of_merit.bragg_section.moderator_T_K: moderator temperature (cold source)
+  figures_of_merit.bragg_section.lambda_max_A: longest wavelength considered
+  figures_of_merit.openmc_check: transport check of the uncollided epithermal rejection (passes if the transported value is within sigma_model_dft)
+  figures_of_merit.openmc_check.compounds: sapphire, Si and the commercially grown crystal with the highest epithermal rejection on the 293 K main front
+  figures_of_merit.openmc_check.particles_per_batch: OpenMC particles per batch
+  figures_of_merit.openmc_check.batches: OpenMC batches
+  figures_of_merit.openmc_check.source_points_watt: points of the tabulated Watt source
+  funnel.tier_a_matching: how rows of `data/curated/growable_crystals.csv` are matched to Materials Project entries
+  funnel.tier_a_matching.crystal_systems: crystal-system words recognised in the vendor text
+  funnel.tier_a_matching.solid_solution_regex: rows whose formula matches this pattern are solid solutions and are not matched
+  funnel.tier_a_matching.structure_types: "structure-type keyword -> space-group symbols; order matters (longer phrases first)"
+  mlip.models: phonon models of the learned-potential benchmark (dft_fc = Materials Project force constants through the same code, as a control)
+  mlip.gpu_memory_fraction: GPU memory cap, so that a crystal that does not fit fails quickly (text, read like the environment variable FA_GPU_MEM_FRACTION)
+  mlip.gpu_check: GPU against CPU reproducibility check on random benchmark crystals
+  shortlist.shortlist: who is shortlisted
+  shortlist.shortlist.reference_filters: "reference filters [formula, space group]; quartz is the entry used as the positive control of the atlas"
+  shortlist.shortlist.hidden_by_memory_gap: "commercially grown crystals added by hand [formula, space group] (YAG and BGO)"
+  shortlist.shortlist.quartz_material_id: Materials Project entry used for quartz
+  shortlist.shortlist.tierB_exclude_flags: flags that keep an other-candidate crystal off the shortlist
+  shortlist.rank_mc.n_draws: Monte Carlo draws of the model error
+  shortlist.rank_mc.seed: random seed of the draws
+  shortlist.rank_mc.n_grid: points of the thickness grid
+  shortlist.rank_mc.grid_sigmas: the grid spans L₀.₈·exp(±grid_sigmas·sigma_model)
+  shortlist.rank_mc.p_statement: "probability level for a statement: X beats sapphire if P > 0.90, sapphire beats X if P < 0.10"
+  shortlist.rank_mc.common_component: "sensitivity with an error shared by all crystals: z_i = √c·z_0 + √(1 − c)·e_i"
+  shortlist.rank_mc.kill3_p: probability level of the test whether the front of commercially grown crystals holds only known filters (at both temperatures) and whether cooling reorders it
+  shortlist.transport.min_thickness_cm: slabs thinner than this are also transported at this thickness
+  shortlist.transport.lateral_cm: lateral size of the slab (effectively infinite)
+  shortlist.transport.e_thermal_cut_eV: upper edge of the thermal energy group
+  shortlist.transport.e_fast_cut_eV: lower edge of the fast energy group
+  shortlist.transport.photon_cut_eV: lower photon energy cut
+  shortlist.transport.rel_sd_target: target relative statistical uncertainty of the tallies
+  shortlist.transport.particles_start: particles of the first run
+  shortlist.transport.particles_factor: factor by which particles grow until the target is met
+  shortlist.transport.particles_cap: largest number of particles
+  shortlist.transport.batches: OpenMC batches
+  shortlist.transport.check_tolerance: largest relative difference allowed between the transported and the uncollided value in the check case
+  shortlist.dips.mosaic_deg: mosaic spread of the single-crystal model (Gaussian)
+  shortlist.dips.mosaic_sensitivity_deg: mosaic spreads of the sensitivity runs
+  shortlist.dips.n_directions: beam directions sampled on the hemisphere
+  shortlist.dips.n_wavelengths: wavelengths in the thermal band
+  shortlist.dips.dip_transmission: a wavelength is in a Bragg dip if the Bragg transmission falls below this
+  shortlist.dips.temperature_K: crystal temperature of the scan
+  shortlist.dips.max_hours_per_compound: time limit per crystal
+  shortlist.dips.fallback_directions: directions used when the time limit would be exceeded
+  shortlist.dossier: activation of the shortlisted crystals
+  shortlist.dossier.flux_n_cm2_s: neutron flux of the irradiation
+  shortlist.dossier.irradiation_days: irradiation time
+  shortlist.dossier.cooling_days: cooling times at which activity is reported
+  shortlist.dossier.volume_cm3: crystal volume
+  stability.unstable_freq_THz: DOS rule, frequency threshold (negative = imaginary)
+  stability.fc_unstable_THz: force-constant screen, threshold at commensurate q-points
+  stability.screen_strata_nsites: strata (atoms per cell) of the sample of the force-constant screen
+  stability.screen_n_per_stratum: crystals per stratum
+  stability.screen_seed: random seed of the sample
+  stability.summary_strata_nsites: strata of the stability summary
+  stability.summary_seed: random seed of the stability summary
+  stability.large_cell_check: check of the 2 meV floor on cells of 22-42 atoms
+  uncertainty.kill3_tau_threshold: cooling reorders the front if Kendall tau between the two temperatures is below this, or if at least one crystal changes front membership
+  mlip.benchmark_set.seed: random seed of the benchmark sample
+  mlip.benchmark_set.strata_nsites_n: "strata of the benchmark sample: [smallest atoms per cell, largest, crystals drawn]"

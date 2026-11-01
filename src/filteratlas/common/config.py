@@ -29,12 +29,32 @@ _Loader.add_implicit_resolver(
 
 @lru_cache(maxsize=None)
 def cfg(name):
-    """Parsed `configs/<name>.yaml` (cached). Values are returned exactly as written; lists stay lists."""
+    """Parsed `configs/<name>.yaml`, cached.
+
+    Values are returned exactly as written in the file (lists stay lists); numbers such as 1e5 are read as floats.
+
+    Parameters:
+        name: file name without extension, e.g. "figures_of_merit".
+    Returns:
+        dict with the content of the file.
+    Example:
+        >>> from filteratlas.common.config import cfg
+        >>> cfg("figures_of_merit")["band_A"]
+    """
     return yaml.load((CONFIGS / f"{name}.yaml").read_text(encoding="utf-8"), Loader=_Loader)
 
 
 def tup(x):
-    """YAML lists -> tuples, recursively (the original code used tuples; equality and hashing are unchanged)."""
+    """Convert YAML lists to tuples, recursively.
+
+    Parameters:
+        x: any value read from a configuration file.
+    Returns:
+        the same value with every list replaced by a tuple.
+    Example:
+        >>> from filteratlas.common.config import tup
+        >>> tup([[0.5, 3.0], 1])
+    """
     if isinstance(x, list):
         return tuple(tup(v) for v in x)
     return x

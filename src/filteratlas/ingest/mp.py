@@ -168,5 +168,19 @@ def phonon_dos_bulk(id_method_pairs, batch=200, refresh=False):
 
 
 def load_dos(path):
+    """Read a phonon DOS file (gzip-compressed JSON) as written by the pipeline.
+
+    The dict has "frequencies" (THz), "densities", "projected_densities" (one row per site), "structure" (pymatgen
+    Structure.as_dict()) and, for learned-potential files, "meta". Materials Project files are in
+    data/upstream/mp/phonon_dos/<method>/<phonon id>.json.gz; SevenNet files in data/intermediate/mlip_atlas/.
+
+    Parameters:
+        path: path of a .json.gz file.
+    Returns:
+        dict as above.
+    Example:
+        >>> from filteratlas.ingest.mp import load_dos
+        >>> dos = load_dos("data/upstream/mp/phonon_dos/pheasy/aaaegyio.json.gz")   # sapphire
+    """
     with gzip.open(path, "rt", encoding="utf-8") as fh:
         return json.load(fh)

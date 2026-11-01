@@ -1,6 +1,6 @@
 # data/
 
-**The data products of version 0.5.0 are distributed separately (four zips with SHA-256 checksums). They are available from the authors on request and will be archived under a DOI on acceptance of the accompanying article.** Unzip them into the repository root so that `data/upstream`, `data/intermediate` and `data/derived` match this tree, then run `make check-data`.
+**The data products of version 0.5.0 are distributed separately (four zips with SHA-256 checksums). They are available from the authors on request and will be archived under a DOI on acceptance of the accompanying article.** Unzip them into the repository root so that `data/upstream`, `data/intermediate` and `data/derived` match this tree, then check what you unpacked, for example `python scripts/check_data.py --class derived` (the user documentation, `wiki/data.md`, explains the checks).
 
 Only this file, `MANIFEST.csv` and `curated/` are tracked in git. `MANIFEST.csv` lists every data file with its path, size, SHA-256, class, the pipeline step that produced it and its source.
 

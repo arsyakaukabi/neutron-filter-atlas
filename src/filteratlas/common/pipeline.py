@@ -15,6 +15,8 @@ from typing import Callable
 
 @dataclass
 class Step:
+    """One sub-step of a pipeline script: its name, the function it runs, the environment it needs ("main", "openmc",
+    "mlip", "network" or "archive"), the one-line description shown by --list, and keyword arguments for the function."""
     name: str
     fn: Callable
     env: str = "main"
@@ -23,6 +25,20 @@ class Step:
 
 
 def run(steps, description):
+    """Run the steps of a pipeline script according to its command line.
+
+    Command-line options: --list (show the steps), --only a,b (run these steps, whatever their environment),
+    --from a (start at step a), --with openmc,mlip,network (also run steps that need these environments).
+
+    Parameters:
+        steps: list of Step, in the order they run.
+        description: text shown by --help (the pipeline script's docstring).
+    Returns:
+        None.
+    Example:
+        >>> from filteratlas.common.pipeline import Step, run
+        >>> run([Step("hello", lambda: print("hello"))], "demo")   # with no command-line options: prints == hello
+    """
     ap = argparse.ArgumentParser(description=description)
     ap.add_argument("--list", action="store_true")
     ap.add_argument("--only", default="")

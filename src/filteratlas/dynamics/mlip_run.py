@@ -46,6 +46,21 @@ def fc_path(rel):
 
 
 def calculator(name, device="cpu"):
+    """ASE calculator of a learned interatomic potential, as used for the benchmark and the atlas.
+
+    Needs the matching learned-potential environment (requirements-mlip*.txt).
+
+    Parameters:
+        name: "sevennet_mf_ompa" (the atlas model), "mace_mp0_medium" or "orb_v3_cons_inf_omat".
+        device: "cpu" or "cuda".
+    Returns:
+        (calculator, precision): the ASE calculator and a text naming its floating-point precision.
+    Raises:
+        ValueError for an unknown name.
+    Example:
+        >>> from filteratlas.dynamics.mlip_run import calculator
+        >>> calc, precision = calculator("sevennet_mf_ompa")   # in the SevenNet environment
+    """
     if name == "mace_mp0_medium":
         from mace.calculators import mace_mp
         return mace_mp(model="medium", default_dtype="float64", device=device), "float64"
@@ -81,8 +96,18 @@ def start_cell(c, structs):
 
 
 def relax(atoms, calc, steps=None):
-    """steps: None = the protocol limit (relax_max_steps); larger only for the relaxation-sensitivity rerun of failed
-    relaxations (kept separate from the atlas)."""
+    """Relax positions and cell with the space-group symmetry fixed (FIRE, FrechetCellFilter, fmax 0.005 eV/Å).
+
+    Parameters:
+        atoms: ase.Atoms to relax (not modified; a relaxed copy is returned).
+        calc: any ASE calculator (a learned potential from calculator(), or another).
+        steps: largest number of FIRE steps (None = relax_max_steps of configs/mlip.yaml, 500).
+    Returns:
+        (atoms, converged, steps_taken, largest_force_eV_per_A).
+    Example:
+        >>> from ase.build import bulk; from ase.calculators.emt import EMT; from filteratlas.dynamics.mlip_run import relax
+        >>> relaxed, converged, steps, fmax = relax(bulk("Al", "fcc", a=4.1), EMT())
+    """
     from ase.constraints import FixSymmetry
     from ase.filters import FrechetCellFilter
     from ase.optimize import FIRE
@@ -97,6 +122,27 @@ def relax(atoms, calc, steps=None):
 
 
 def phonons(syms, lat, frac, sc, prim, calc=None, fc=None):
+    """Phonon DOS of a crystal by finite displacements (phonopy), in the file format of the pipeline.
+
+    Either computes forces on displaced supercells (0.01 Å) with calc, or uses given force constants fc. Then
+    symmetrises the force constants, finds the lowest frequency on a 40 Å Gamma-centred mesh and at the
+    supercell-commensurate q-points, and computes the site-projected DOS (tetrahedron method).
+
+    Parameters:
+        syms: chemical symbols of the unit cell, one per atom.
+        lat: 3x3 lattice vectors in Å (rows).
+        frac: fractional coordinates, one row per atom.
+        sc: 3x3 supercell matrix (the atlas uses a diagonal supercell of at least 12 Å per axis).
+        prim: 3x3 primitive matrix (numpy.eye(3) if the cell is primitive).
+        calc: ASE calculator for the forces (ignored if fc is given).
+        fc: optional phonopy force constants of that supercell.
+    Returns:
+        (dos, min_freq_mesh_THz, min_freq_commensurate_THz, n_displacements); dos is a dict with "frequencies",
+        "densities", "projected_densities" and "structure", ready for filteratlas.xs.ncmat.build_vdos_material.
+    Example:
+        >>> import numpy as np; from ase.build import bulk; from ase.calculators.emt import EMT; from filteratlas.dynamics.mlip_run import phonons
+        >>> dos, fmesh, fcomm, nd = phonons(["Al"], bulk("Al", "fcc", a=4.05).cell[:], [[0, 0, 0]], np.diag([4, 4, 4]), np.eye(3), calc=EMT())
+    """
     from ase import Atoms
     from phonopy import Phonopy
     from phonopy.harmonic.dynmat_to_fc import get_commensurate_points
